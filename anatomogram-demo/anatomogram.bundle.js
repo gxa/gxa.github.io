@@ -805,6 +805,10 @@ var _react = __webpack_require__(18);
 
 var _react2 = _interopRequireDefault(_react);
 
+var _reactDom = __webpack_require__(37);
+
+var _reactDom2 = _interopRequireDefault(_reactDom);
+
 var _propTypes = __webpack_require__(21);
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
@@ -840,14 +844,18 @@ var Anatomogram = function (_React$Component) {
     var _this = _possibleConstructorReturn(this, (Anatomogram.__proto__ || Object.getPrototypeOf(Anatomogram)).call(this, props));
 
     _this._attachListeners = _this._attachListeners.bind(_this);
+    _this._getSvgElementById = _this._getSvgElementById.bind(_this);
+    _this._getEfoLayerGroup = _this._getEfoLayerGroup.bind(_this);
     return _this;
   }
 
   _createClass(Anatomogram, [{
     key: '_paintIds',
     value: function _paintIds(ids, colour, opacity) {
+      var _this2 = this;
+
       ids.forEach(function (id) {
-        var e = document.getElementById(id);
+        var e = _this2._getSvgElementById(id);
 
         // We might be showing an ID which is not part of the displayed anatomogram (e.g. heart in brain)
         if (e) {
@@ -859,8 +867,10 @@ var Anatomogram = function (_React$Component) {
   }, {
     key: '_attachMouseOverMouseOutListeners',
     value: function _attachMouseOverMouseOutListeners(ids, mouseOverColour, mouseOverOpacity) {
+      var _this3 = this;
+
       ids.forEach(function (id) {
-        var e = document.getElementById(id);
+        var e = _this3._getSvgElementById(id);
 
         if (e) {
           e.addEventListener('mouseover', function () {
@@ -876,6 +886,37 @@ var Anatomogram = function (_React$Component) {
           });
         }
       });
+    }
+  }, {
+    key: '_getSvgElementById',
+    value: function _getSvgElementById(id) {
+      var efoLayerGroup = this._getEfoLayerGroup();
+
+      if (efoLayerGroup) {
+        for (var i = 0; i < efoLayerGroup.children.length; i++) {
+          if (efoLayerGroup.children[i].id === id) {
+            if (efoLayerGroup.children[i].attributes['xlink:href']) {
+              return this._getSvgElementById(efoLayerGroup.children[i].attributes['xlink:href'].value.substring(1));
+            } else {
+              return efoLayerGroup.children[i];
+            }
+          }
+        }
+      }
+
+      return undefined;
+    }
+  }, {
+    key: '_getEfoLayerGroup',
+    value: function _getEfoLayerGroup() {
+      var svgGroups = _reactDom2.default.findDOMNode(this.svgRef).getElementsByTagName('g');
+      for (var i = 0; i < svgGroups.length; i++) {
+        if (svgGroups[i].id === 'LAYER_EFO') {
+          return svgGroups[i];
+        }
+      }
+
+      return undefined;
     }
   }, {
     key: '_attachListeners',
@@ -900,8 +941,20 @@ var Anatomogram = function (_React$Component) {
       this._attachMouseOverMouseOutListeners(selectIds, selectColour, selectOpacity + 0.1);
     }
   }, {
+    key: 'componentDidUpdate',
+    value: function componentDidUpdate() {
+      this._attachListeners();
+    }
+  }, {
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      this._attachListeners();
+    }
+  }, {
     key: 'render',
     value: function render() {
+      var _this4 = this;
+
       var aspectRatio = _svgsMetadata2.default[this.props.filename].width / _svgsMetadata2.default[this.props.filename].height;
       var _props2 = this.props,
           height = _props2.height,
@@ -924,8 +977,11 @@ var Anatomogram = function (_React$Component) {
         'div',
         { style: this.props.style },
         _react2.default.createElement(_reactSvg2.default, {
+          ref: function ref(svgRef) {
+            _this4.svgRef = svgRef;
+          },
           path: (0, _urijs2.default)('svg/' + this.props.filename, this.props.urlToResources).toString(),
-          callback: this._attachListeners,
+
           style: sizeStyle
         })
       );
@@ -1170,7 +1226,7 @@ var ReactServerRenderingTransaction = __webpack_require__(82);
 var ReactUpdates = __webpack_require__(10);
 
 var emptyObject = __webpack_require__(22);
-var instantiateReactComponent = __webpack_require__(47);
+var instantiateReactComponent = __webpack_require__(48);
 var invariant = __webpack_require__(1);
 
 var pendingTransactions = 0;
@@ -2478,7 +2534,7 @@ var _react = __webpack_require__(18);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _reactDom = __webpack_require__(61);
+var _reactDom = __webpack_require__(37);
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
 
